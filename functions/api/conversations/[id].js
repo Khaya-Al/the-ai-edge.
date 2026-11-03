@@ -4,7 +4,8 @@ export async function onRequestGet({ request, env, params }) {
   const conversation = await env.DB.prepare("SELECT id,title,agent,created_at,updated_at FROM conversations WHERE id=? AND user_id=?").bind(params.id, auth.user.id).first();
   if (!conversation) return json({ error: "Conversation not found." }, 404);
   const messages = await env.DB.prepare("SELECT id,role,content,created_at FROM messages WHERE conversation_id=? AND user_id=? ORDER BY created_at ASC LIMIT 200").bind(params.id, auth.user.id).all();
-  return json({ conversation, messages: messages.results || [] });
+  const files = await env.DB.prepare("SELECT id,filename,mime_type,size_bytes,extracted_text FROM user_files WHERE conversation_id=? AND user_id=? ORDER BY created_at ASC").bind(params.id, auth.user.id).all();
+  return json({ conversation, messages: messages.results || [], files: files.results || [] });
 }
 export async function onRequestPatch({ request, env, params }) {
   const auth = await requireUser(request, env); if (auth.error) return auth.error;
