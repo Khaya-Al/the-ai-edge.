@@ -1,1 +1,5 @@
-const key="aiedge_tools",saved=JSON.parse(localStorage.getItem(key)||'["edge"]');document.querySelectorAll("[data-tool]").forEach(i=>i.checked=saved.includes(i.dataset.tool));document.getElementById("save").onclick=()=>{let v=[...document.querySelectorAll("[data-tool]:checked")].map(i=>i.dataset.tool);if(!v.length)return alert("Choose at least one tool.");localStorage.setItem(key,JSON.stringify(v));document.getElementById("save").textContent="Saved ✓";};
+// Provider preferences are not stored. Choose a service only when you need to continue a task.
+const providers=[["chatgpt","ChatGPT","https://chatgpt.com/"],["claude","Claude","https://claude.ai/new"],["gemini","Google Gemini","https://gemini.google.com/app"],["perplexity","Perplexity","https://www.perplexity.ai/"]];
+document.querySelectorAll("[data-tool]").forEach(i=>{i.checked=false;i.addEventListener("change",()=>{if(i.checked){const p=providers.find(x=>x[0]===i.dataset.tool);if(p)location.href=p[2];else location.href="app.html";}})});
+const note=document.querySelector("aside");if(note)note.textContent="The AI Edge does not save which AI providers you use. Choose a provider only when you want to continue a task there. You sign in directly with that provider.";
+const save=document.getElementById("save");if(save){save.textContent="No preferences to save";save.disabled=true;}
