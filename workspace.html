@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#080d18"><meta name="description" content="Work with ten specialist AI learning assistants across academics, research, mathematics, engineering and technology."><title>AI Workspace | The AI Edge</title><link rel="stylesheet" href="styles.css"></head><body><div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<header class="topbar">
+<a class="brand" href="index.html"><span class="brand-mark">E</span><span>THE AI <b>EDGE</b></span></a>
+<button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button>
+<nav id="nav"><a href="workspace.html">Workspace</a><a href="academy.html">Academy</a><a href="about.html">About</a><a href="services.html">Services</a><a href="contact.html">Contact</a></nav>
+<a class="nav-cta" href="workspace.html">Explore workspace <span>↗</span></a></header><main><section class="page-hero"><div class="section-kicker">01 — THE AI WORKSPACE</div><h1>Find the right mind<br><span class='gradient-text'>for the task.</span></h1><p>Choose a specialist, ask a question and work through the answer. Use AI as a learning partner: question assumptions, verify important facts and build your own understanding.</p></section>    <section class="section workspace" id="workspace">
+      <div class="section-heading"><div><div class="section-kicker">02 — Your learning workspace</div><h2>Meet your specialists<span class="accent">.</span></h2></div><p>Ten focused spaces. One connected learning experience.</p></div>
+      <div class="workspace-layout">
+        <div class="agent-grid" id="agentGrid">
+          <button class="agent-card active" data-agent="tutor"><span class="agent-icon">✳</span><span class="agent-id">A01 / LEARN</span><b>Academic Tutor</b><small>Understand difficult concepts.</small><span class="agent-arrow">↗</span></button>
+          <button class="agent-card" data-agent="research"><span class="agent-icon">⌕</span><span class="agent-id">A02 / DISCOVER</span><b>Research Specialist</b><small>Explore evidence and ideas.</small><span class="agent-arrow">↗</span></button>
+          <button class="agent-card" data-agent="maths"><span class="agent-icon">∑</span><span class="agent-id">A03 / SOLVE</span><b>Mathematics</b><small>Break down complex problems.</small><span class="agent-arrow">↗</span></button>
+          <button class="agent-card" data-agent="engineering"><span class="agent-icon">⌬</span><span class="agent-id">A04 / DESIGN</span><b>Engineering</b><small>Explore technical methods.</small><span class="agent-arrow">↗</span></button>
+          <button class="agent-card" data-agent="programming"><span class="agent-icon">⌘</span><span class="agent-id">A05 / BUILD</span><b>IT & Programming</b><small>Develop technical skills.</small><span class="agent-arrow">↗</span></button>
+          <button class="agent-card" data-agent="writing"><span class="agent-icon">¶</span><span class="agent-id">A06 / COMMUNICATE</span><b>Academic Writing</b><small>Structure ideas with clarity.</small><span class="agent-arrow">↗</span></button>
+          <button class="agent-card" data-agent="design"><span class="agent-icon">◈</span><span class="agent-id">A07 / CREATE</span><b>Design Studio</b><small>Shape visual explanations.</small><span class="agent-arrow">↗</span></button>
+          <button class="agent-card" data-agent="exam"><span class="agent-icon">◷</span><span class="agent-id">A08 / PREPARE</span><b>Exam Coach</b><small>Practise with a clear plan.</small><span class="agent-arrow">↗</span></button>
+          <button class="agent-card" data-agent="quality"><span class="agent-icon">✓</span><span class="agent-id">A09 / REVIEW</span><b>Quality Assurance</b><small>Check work against criteria.</small><span class="agent-arrow">↗</span></button>
+          <button class="agent-card" data-agent="career"><span class="agent-icon">↗</span><span class="agent-id">A10 / GROW</span><b>Career Mentor</b><small>Plan your next move.</small><span class="agent-arrow">↗</span></button>
+        </div>
+        <aside class="demo-panel">
+          <div class="demo-top"><span class="live-dot"></span> INTERACTIVE PREVIEW <span class="demo-tag">DEMO MODE</span></div>
+          <div class="demo-agent-icon" id="demoIcon">✳</div>
+          <div class="demo-label" id="demoLabel">A01 / LEARN</div>
+          <h3 id="demoTitle">Academic Tutor</h3>
+          <p id="demoDescription">Make difficult ideas easier to understand with clear explanations, examples and guided practice.</p>
+          <div class="demo-prompt-label">ASK THIS SPECIALIST</div>
+          <div class="sample-prompt sample-prompt-click" id="samplePrompt" role="button" tabindex="0">Explain a difficult concept to me step by step, then test my understanding.</div>
+          <form id="chatForm" class="chat-form">
+            <label class="sr-only" for="chatInput">Your question</label>
+            <textarea id="chatInput" maxlength="3000" rows="3" placeholder="Ask your question..."></textarea>
+            <div class="chat-controls"><span id="charCount">0 / 3000</span><button class="button button-primary demo-button" id="sendButton" type="submit">Send question <span>→</span></button></div>
+          </form>
+          <div class="demo-response" id="demoResponse" aria-live="polite"><span class="response-label">AI EDGE RESPONSE</span><p>Choose a specialist, enter a question and start learning. Your chat is not saved by this prototype.</p></div>
+          <p class="demo-disclaimer">Live AI runs through the Cloudflare backend. Free daily usage limits apply.</p>
+        </aside>
+      </div>
+    </section></main><footer><a class="brand" href="index.html"><span class="brand-mark">E</span><span>THE AI <b>EDGE</b></span></a><span>© <span id="year"></span> THE AI EDGE. BUILT BY <b>KHAYA OWAMI LAINI</b>.</span><a href="index.html">BACK TO HOME ↑</a></footer><script src="script.js"></script></body></html>
