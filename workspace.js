@@ -1,6 +1,8 @@
 const $=id=>document.getElementById(id),tools={chatgpt:["ChatGPT","https://chatgpt.com/"],claude:["Claude","https://claude.ai/new"],gemini:["Gemini","https://gemini.google.com/app"],perplexity:["Perplexity","https://www.perplexity.ai/"]};
-fetch("/api/auth/me").then(r=>r.json()).then(d=>{if(d.user)$("user").textContent=d.user.name+" · "+d.user.email;else if(!d.setupRequired)location.replace("login.html");}).catch(()=>{});
-$("logout").onclick=async()=>{await fetch("/api/auth/logout",{method:"POST"});location.href="login.html";};
+// Guest access is the default. Authentication remains optional for returning signed-in users.
+$("logout").hidden=true;
+fetch("/api/auth/me").then(r=>r.json()).then(d=>{if(d.user){$("user").textContent=d.user.name+" · "+d.user.email;$("logout").hidden=false;}}).catch(()=>{});
+$("logout").onclick=async()=>{await fetch("/api/auth/logout",{method:"POST"});location.href="index.html";};
 document.querySelectorAll(".suggestions button").forEach(b=>b.onclick=()=>{$("question").value=b.textContent;$("question").focus();});
 function promptFor(q){return "I am continuing a task from The AI Edge. Please help me with this request:\n\n"+q+"\n\nBe accurate, explain assumptions, do not invent sources or facts, and identify anything that needs independent verification. Structure the response clearly and make it useful.";}
 function external(q,id,reason){const [name,url]=tools[id]||tools.chatgpt,p=promptFor(q);$("welcome").hidden=true;$("result").innerHTML='<article class="recommend"><small>THE AI EDGE RECOMMENDS</small><h2>Continue with '+name+'</h2><p>'+escapeHTML(reason)+' Copy the prepared prompt, then continue with the provider. You will sign in directly on its website.</p><pre id="handoff"></pre><button id="copyPrompt" class="secondary">Copy prepared prompt</button><a id="openProvider" href="'+url+'">Continue to '+name+' →</a></article>';$("handoff").textContent=p;$("copyPrompt").onclick=async()=>{try{await navigator.clipboard.writeText(p);$("copyPrompt").textContent="Copied ✓";}catch(e){$("copyPrompt").textContent="Select and copy the prompt above";}};}
