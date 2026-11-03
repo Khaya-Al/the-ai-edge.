@@ -1,12 +1,3 @@
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
-
-export default defineConfig({
-  build: {
-    rollupOptions: {
-      input: {
-        home: resolve(process.cwd(), "index.html")
-      }
-    }
-  }
-});
+export default defineConfig({build:{rollupOptions:{input:{home:resolve(process.cwd(),"index.html"),login:resolve(process.cwd(),"login.html"),onboarding:resolve(process.cwd(),"onboarding.html"),app:resolve(process.cwd(),"app.html"),connections:resolve(process.cwd(),"connections.html"),promptStudio:resolve(process.cwd(),"prompt-studio.html"),research:resolve(process.cwd(),"research.html"),academy:resolve(process.cwd(),"academy.html")}}}});
