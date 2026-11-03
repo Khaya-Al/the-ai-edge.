@@ -17,6 +17,8 @@ export async function onRequestPatch({ request, env, params }) {
 }
 export async function onRequestDelete({ request, env, params }) {
   const auth = await requireUser(request, env); if (auth.error) return auth.error;
+  const fileRows = await env.DB.prepare("SELECT object_key FROM user_files WHERE conversation_id=? AND user_id=?").bind(params.id, auth.user.id).all();
+  if (env.FILES) await Promise.all((fileRows.results || []).map(file => env.FILES.delete(file.object_key)));
   const result = await env.DB.prepare("DELETE FROM conversations WHERE id=? AND user_id=?").bind(params.id, auth.user.id).run();
   return result.meta.changes ? json({ ok: true }) : json({ error: "Conversation not found." }, 404);
 }
