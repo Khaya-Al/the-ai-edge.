@@ -1,60 +1,50 @@
-# The AI Edge
+# The AI Edge — Login-first AI gateway
 
-The AI Edge is being redesigned as a public AI command centre: one interface for centrally managed model providers, prompt engineering, evidence-led academic research workflows and AI skills education.
+The public site now opens at a sign-in / registration page. After authentication, users choose which AI tools they already use and enter a multi-page workspace.
 
-## Current redesign
+## Product experience
 
-- Public landing page and command-centre interface.
-- Provider availability indicators for OpenAI, Anthropic Claude, Google Gemini and Perplexity.
-- Single-provider routing and multi-provider comparison UI.
-- Prompt Engineering Studio that builds reusable, structured prompts in the browser.
-- Academic Research Laboratory overview covering discovery, reference checking, claim assessment and synthesis.
-- Cloudflare Pages Functions keep provider credentials on the server; no API key is sent to browser code.
+- **Login / registration:** email and password account flow, backed by Cloudflare Pages Functions and D1.
+- **Tool selection:** ChatGPT, Claude, Gemini, Perplexity and The AI Edge.
+- **AI command centre:** the Workers AI task router recommends a next tool. The built-in assistant can answer when The AI Edge is the selected route.
+- **Provider handoff:** for third-party tools, the workspace prepares a task-specific prompt, copies it and opens the provider's official website in a new tab. The user signs in directly with that provider and pastes the prompt.
+- **Prompt Engineering Studio:** builds structured prompts and hands them to a selected provider.
+- **Academic Research Lab:** builds literature-search prompts and links to scholarly discovery services.
+- **Academy:** separate learning page.
+- **Responsive layout:** workspace navigation adapts to mobile screens; separate pages open from the workspace navigation.
 
-## Central provider configuration
+## Important provider account boundary
 
-The command centre supports these Cloudflare Pages environment secrets:
+The AI Edge does not ask users for their ChatGPT, Claude, Gemini or Perplexity passwords, read browser cookies, reuse consumer subscription sessions, or pretend that selecting a tool connects its account. Consumer account sign-in is not the same as third-party API access. Where a provider does not offer an approved consumer-account connection for this use, the supported experience is a prepared prompt plus a link to the official provider site. Users sign in and continue there themselves.
 
-| Secret name | Provider |
-| --- | --- |
-| `OPENAI_API_KEY` | OpenAI Responses API |
-| `ANTHROPIC_API_KEY` | Anthropic Messages API |
-| `GEMINI_API_KEY` | Google Gemini API |
-| `PERPLEXITY_API_KEY` | Perplexity API |
+This means the platform does **not** send a request into the user's consumer AI account in the background. The Edge can recommend a provider and prepare the task for handoff. Its own built-in assistant uses the already configured Cloudflare Workers AI binding named `AI`; it does not require the site owner to enter separate OpenAI/Anthropic/Gemini/Perplexity API keys.
 
-Add credentials in Cloudflare Pages → Settings → Variables and Secrets. Use encrypted secrets, not public environment variables. The public `/api/providers` endpoint exposes only whether a provider is configured; it never returns secret values.
+## Required account setup before sign-in works
 
-Provider API usage is billed to The AI Edge's central provider accounts and is separate from consumer subscriptions in cases where the provider treats its API as a separate product. Confirm each provider's current terms, regional availability, model access and billing before enabling it.
+The repository already contains the account authentication functions and the initial D1 schema at `migrations/0001_initial.sql`. The Cloudflare Pages project must have a D1 database binding named exactly `DB`, and the initial migration must be applied to that database. The existing `wrangler.toml` cannot contain a database_id until the Cloudflare D1 database is created.
 
-Official references:
-- OpenAI API authentication: https://developers.openai.com/api/reference/overview
-- Anthropic API authentication: https://platform.claude.com/docs/en/manage-claude/authentication
-- Gemini API keys: https://ai.google.dev/gemini-api/docs/api-key
-- Perplexity API: https://docs.perplexity.ai/
+1. In Cloudflare Dashboard, open Workers & Pages → D1 SQL Database and create a database (for example, `the-ai-edge-db`).
+2. Open the database's Console and execute the contents of `migrations/0001_initial.sql`.
+3. Open Workers & Pages → Pages → `the-ai-edge` → Settings → Functions → D1 database bindings.
+4. Add a binding with variable name `DB` and select the database you created.
+5. Redeploy the latest GitHub deployment.
 
-## Important production gate
+Until these steps are completed, the login and registration endpoints intentionally return a setup-required error. Do not share database credentials or passwords in chat.
 
-**Do not add live provider keys and expose the public command endpoint to general traffic until abuse controls are enabled.** The current API validates request size and provider configuration, but a public production launch still needs edge rate limiting, bot protection, spend caps/alerts at each provider, monitoring, and a clear acceptable-use/privacy policy. Without these controls, anonymous visitors could consume centrally billed API credits.
+## User preferences and device support
 
-Recommended next steps before opening live AI access:
-1. Configure Cloudflare rate limiting for `/api/command` and bot protection (for example, Turnstile with server-side validation).
-2. Set strict provider-side monthly budgets and alert thresholds.
-3. Add user-facing usage limits and request logging that avoids storing sensitive prompt content.
-4. Add a privacy notice explaining which provider receives a prompt and how it is processed.
-5. Add scholarly metadata integrations (Crossref, OpenAlex and Semantic Scholar) before claiming reference verification is live.
+Selected provider preferences are currently saved in browser local storage. The interface is responsive across mobile, tablet and desktop, but provider selections are not yet synchronised between devices. Cross-device preference sync requires a user-preferences table and authenticated settings endpoint in D1.
 
-## Research integrity
-
-The Research Laboratory section is currently a product direction/preview, not a completed scholarly verification engine. It does not yet certify citations, check every claim against primary sources, detect plagiarism, or guarantee academic integrity. Never present AI-generated references as verified. A production implementation should resolve DOI metadata and compare title, author, year and publication details against scholarly indexes, then show evidence and confidence for each check.
-
-## Deployment
+## Build / deployment
 
 - Repository: `Khaya-Al/the-ai-edge.`
 - Branch: `main`
 - Build command: `npm run build`
 - Build output: `dist`
-- Cloudflare Pages project: `the-ai-edge`
-- Production URL: https://the-ai-edge.pages.dev/
-- GitHub pushes trigger Cloudflare Pages deployments automatically.
+- Pages project: `the-ai-edge`
+- Live URL: https://the-ai-edge.pages.dev/
+- GitHub pushes trigger Cloudflare Pages deployments.
 
-The existing Workers AI binding named `AI` may remain configured, but the redesigned command endpoint uses the provider secrets listed above. Existing account, agent and file APIs are not part of the new homepage experience and should not be represented as part of the new product without a separate review.
+## Research integrity
+
+The Research Lab currently creates search prompts and links to external scholarly discovery tools. It does not yet automatically verify DOI metadata, certify references, check every claim against full-text sources, or detect plagiarism. Verify every reference against the publisher or scholarly index.
