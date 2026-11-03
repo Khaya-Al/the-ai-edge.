@@ -42,7 +42,7 @@ CREATE INDEX IF NOT EXISTS messages_conversation_idx ON messages(conversation_id
 CREATE TABLE IF NOT EXISTS user_files (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  conversation_id TEXT REFERENCES conversations(id) ON DELETE SET NULL,
+  conversation_id TEXT REFERENCES conversations(id) ON DELETE CASCADE,
   object_key TEXT NOT NULL UNIQUE,
   filename TEXT NOT NULL,
   mime_type TEXT NOT NULL,
