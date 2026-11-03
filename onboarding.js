@@ -1,1 +1,2 @@
-const key="aiedge_tools",saved=JSON.parse(localStorage.getItem(key)||'["edge"]');document.querySelectorAll('#tools input').forEach(i=>i.checked=saved.includes(i.value));document.getElementById("save").onclick=()=>{let v=[...document.querySelectorAll('#tools input:checked')].map(i=>i.value);if(!v.length)return alert("Choose at least one tool.");localStorage.setItem(key,JSON.stringify(v));location.href="app.html";};
+// Provider onboarding has been removed. The Edge no longer saves provider selections.
+location.replace("app.html");
