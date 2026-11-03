@@ -13,5 +13,11 @@
   "devDependencies": {
     "vite": "^7.0.0",
     "wrangler": "^4.34.0"
+  },
+  "dependencies": {
+    "dompurify": "^3.3.0",
+    "mammoth": "^1.11.0",
+    "marked": "^15.0.12",
+    "pdfjs-dist": "^5.4.149"
   }
 }
