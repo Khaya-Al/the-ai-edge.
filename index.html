@@ -1,1 +1,55 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=login.html"><title>The AI Edge</title></head><body><a href="login.html">Sign in to The AI Edge</a><script>location.replace("login.html")</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f0e8">
+<title>The AI Edge — Curiosity meets intelligence</title>
+<link rel="stylesheet" href="platform.css">
+<style>
+body{min-height:100vh;display:grid;place-items:center;overflow-x:hidden}
+.welcome{width:min(100% - 40px,900px);padding:54px 0;text-align:center;position:relative}
+.mark{width:76px;height:76px;margin:0 auto 22px;border-radius:24px;background:var(--teal);color:white;display:grid;place-items:center;font:800 38px Manrope;box-shadow:0 16px 45px #1e5b6026;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-9px) rotate(4deg)}}
+.eyebrow{font-size:10px;letter-spacing:3px;color:var(--coral);font-weight:700}
+h1{font:800 clamp(48px,9vw,92px)/.98 Manrope;letter-spacing:-5px;margin:24px 0;color:var(--ink)}
+h1 span{color:var(--teal)}
+.intro{max-width:600px;margin:0 auto;color:var(--muted);font-size:15px;line-height:1.9}
+.quote{max-width:690px;margin:48px auto 32px;padding:30px 28px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.quote blockquote{font:600 clamp(18px,3vw,25px)/1.55 Manrope;margin:0;color:var(--ink)}
+.quote small{display:block;margin-top:15px;color:var(--coral);font-size:9px;letter-spacing:2px}
+.enter{display:inline-block;background:var(--teal);color:white;text-decoration:none;border-radius:6px;padding:16px 25px;font-size:12px;font-weight:700;box-shadow:0 10px 24px #1e5b6024;transition:transform .2s,box-shadow .2s}
+.enter:hover{transform:translateY(-3px);box-shadow:0 15px 30px #1e5b6030}
+.foot{margin-top:38px;color:var(--muted);font-size:9px;letter-spacing:1.5px}
+@media(max-width:600px){.welcome{padding:34px 0}h1{letter-spacing:-3px}.quote{margin:34px auto 27px;padding:23px 12px}}
+</style>
+</head>
+<body>
+<main class="welcome">
+<div class="mark" aria-label="The AI Edge logo">E</div>
+<div class="eyebrow">A SPACE FOR HUMAN CURIOSITY</div>
+<h1>Think beyond.<br><span>Discover more.</span></h1>
+<p class="intro">The human brain asks the questions. Artificial intelligence helps us explore what comes next. Bring your curiosity — let's turn it into possibility.</p>
+<section class="quote" aria-live="polite">
+<blockquote id="dailyQuote"></blockquote>
+<small>YOUR DAILY EDGE / HUMAN CURIOSITY × AI VISION</small>
+</section>
+<a class="enter" href="login.html">Enter The AI Edge <span aria-hidden="true">→</span></a>
+<div class="foot">QUESTION DEEPLY. LEARN FEARLESSLY. BUILD THE FUTURE.</div>
+</main>
+<script>
+const quotes=[
+"Curiosity is the brain reaching beyond what it knows; AI is a new instrument for exploring what it can imagine.",
+"The human mind was built to ask 'what if?' — our vision for AI should help us discover, not stop us from thinking.",
+"Every great discovery begins with a question. Let human curiosity lead, and let artificial intelligence widen the horizon.",
+"AI can process information at incredible speed. Only a curious mind can decide which questions are worth asking.",
+"The future belongs to minds that keep wondering, learning and imagining — with intelligence, both human and artificial, working together.",
+"Your brain is not a storage device; it is a universe of questions. Use AI to explore that universe with purpose.",
+"Artificial intelligence expands our reach, but human curiosity gives the journey its direction.",
+"Do not ask AI to replace your thinking. Ask it to challenge your thinking, stretch your imagination and help you grow.",
+"The most powerful technology begins with a deeply human act: the courage to be curious.",
+"An intelligent future is not human versus machine. It is human imagination discovering new possibilities with AI."
+];
+const now=new Date();const day=Math.floor(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())/86400000);
+document.getElementById("dailyQuote").textContent="“"+quotes[((day%quotes.length)+quotes.length)%quotes.length]+"”";
+</script>
+</body></html>
