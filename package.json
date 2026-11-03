@@ -15,9 +15,9 @@
     "wrangler": "^4.34.0"
   },
   "dependencies": {
-    "dompurify": "^3.3.0",
-    "mammoth": "^1.11.0",
-    "marked": "^15.0.12",
-    "pdfjs-dist": "^5.4.149"
+    "dompurify": "^3.4.17",
+    "mammoth": "^1.13.0",
+    "marked": "^18.1.2",
+    "pdfjs-dist": "^5.7.284"
   }
 }
