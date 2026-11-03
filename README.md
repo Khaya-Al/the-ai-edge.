@@ -1,29 +1,61 @@
-# The AI Edge — live AI website prototype
+# The AI Edge
 
-Static-first website with a Cloudflare Pages Functions backend. Ten specialist workspaces call Workers AI through a server-side function.
+The AI Edge is a multi-page learning platform powered by Cloudflare Pages Functions and Workers AI.
 
-## Included
-- Ten specialist prompts and real AI chat at `POST /api/chat`.
-- Health endpoint at `GET /api/health`.
-- No OpenAI, Anthropic or Gemini key required. Provider credentials are not exposed in the browser.
-- Chat history is temporary in browser memory and is not persisted.
+## Current platform features
+- Ten specialist AI agents.
+- Email/password sign-up and sign-in with PBKDF2 password hashing and secure, HTTP-only session cookies.
+- Private conversations saved per account, with conversation history, rename and delete.
+- Private file uploads stored in Cloudflare R2.
+- Browser-side text extraction for PDF, DOCX, TXT and Markdown documents; extracted text can be discussed with the AI.
+- Image files can be stored with a conversation, but the current text-only AI model cannot interpret image pixels yet.
+- Health endpoint reports which Cloudflare services are connected.
 
-## Zero-cost target and limits
-This project targets Cloudflare's free tiers. Workers AI has a limited free daily Neuron allocation; requests can stop when the quota is exhausted. The free tier is not unlimited. The selected model is `@cf/zai-org/glm-4.7-flash`, which Cloudflare lists among models available on the free plan. Confirm model access and current limits in your account before launch. No paid domain, database or external AI API is included.
+## Required Cloudflare resources
 
-## Deploy
-1. Push this folder to a GitHub repository named `the-ai-edge`.
-2. In Cloudflare, create a Pages project and connect the repository.
-3. Build command: `npm run build`; output directory: `dist`.
-4. In Pages project Settings → Bindings, add a Workers AI binding named exactly `AI`.
-5. Redeploy after adding the binding. `wrangler.toml` declares the binding for configuration-as-code.
-6. Visit `/api/health`; `aiConfigured` should be `true`. Then open the site, select an agent and send a question.
+The site uses the existing Workers AI binding named `AI`, plus two resources that must be created and connected before account and upload features work:
 
-## Local testing
-`npm install` then `npm run dev:pages`. Workers AI inference uses your Cloudflare account during local development too, and consumes the applicable free allocation.
+1. **D1 database** — create a database, then open its Console and execute the SQL in `migrations/0001_initial.sql`.
+2. **R2 bucket** — create a private bucket for user uploads (for example `the-ai-edge-uploads`).
 
-## API request
-`POST /api/chat` with JSON `{ "agent":"tutor", "messages":[{"role":"user","content":"Explain photosynthesis simply."}] }`. Agent keys: `tutor`, `research`, `maths`, `engineering`, `programming`, `writing`, `design`, `exam`, `quality`, `career`.
+Bind both to the Pages project:
+- Pages project → Settings → Bindings → Add → D1 database. Variable name: `DB`. Select the database.
+- Pages project → Settings → Bindings → Add → R2 bucket. Variable name: `FILES`. Select the bucket.
+- Keep the existing Workers AI binding variable name exactly `AI`.
+- Save and trigger a new deployment after adding bindings.
 
-## Current limitations before public launch
-No login, database, file uploads or saved cross-device history. No robust per-user rate limiting is included yet; add Turnstile and/or an appropriately configured rate limiter before promoting publicly. Avoid collecting sensitive student information. Model responses are educational assistance, not guaranteed expert advice or verified research. Free quotas can run out; this version does not automatically upgrade to a paid plan.
+Do not make the R2 bucket public. User files are retrieved only through authenticated Pages Functions.
+
+## Deployment
+- Repository: `Khaya-Al/the-ai-edge.`
+- Build command: `npm run build`
+- Build output: `dist`
+- Branch: `main`
+- GitHub pushes trigger Cloudflare Pages deployments automatically.
+
+After the D1 migration and bindings are configured, visit `/api/health`. The expected readiness fields are:
+```json
+{
+  "ok": true,
+  "aiConfigured": true,
+  "databaseConfigured": true,
+  "fileStorageConfigured": true,
+  "ready": true
+}
+```
+
+## Account and security notes
+- Passwords are never stored in plain text. Passwords are hashed with PBKDF2-SHA-256 and a unique salt.
+- Sessions use random opaque tokens stored as SHA-256 hashes in D1 and are issued in Secure, HttpOnly, SameSite=Lax cookies.
+- Conversations and files are scoped to the authenticated user.
+- Registration currently does not require email verification. Password-reset emails, email verification, stronger automated abuse controls/rate limiting and account deletion workflows still need to be added before a broad public launch.
+- Keep student data minimal. Do not upload confidential, sensitive or third-party personal information without permission.
+
+## Document handling
+- Supported uploads: PDF, DOCX, TXT, Markdown, PNG, JPG and WebP; maximum 8 MB each.
+- PDF/DOCX/TXT/Markdown text is extracted in the browser and saved with the private file record to support follow-up questions.
+- Image uploads are saved and attached to conversations but are not yet visually analysed by the current model.
+- Scanned PDFs may have no selectable text; OCR is not yet enabled.
+
+## AI
+The current model is `@cf/zai-org/glm-4.7-flash` through Workers AI. Answers are educational assistance, not guaranteed expert advice or verified research. The free Workers AI allocation is limited and can be exhausted.
