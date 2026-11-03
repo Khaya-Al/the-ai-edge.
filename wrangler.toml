@@ -8,4 +8,4 @@ binding = "AI"
 [[d1_databases]]
 binding = "DB"
 database_name = "the-ai-edge-db"
-database_id = "00000001-00000000-00005118-30a186ad545bdad0e264c2f145c1c8db"
+database_id = "7f3cc5c7-5b9c-47f5-a3ca-df7d4cafacf9"
