@@ -1,130 +1,47 @@
-const agents = {
-  tutor: { icon: "✳", label: "A01 / LEARN", title: "Academic Tutor", description: "Make difficult ideas easier to understand with clear explanations, examples and guided practice.", prompt: "Explain a difficult concept to me step by step, then test my understanding." },
-  research: { icon: "⌕", label: "A02 / DISCOVER", title: "Research Specialist", description: "Explore research questions, evidence, scholarly literature and the foundations of a strong investigation.", prompt: "Help me turn my topic into a focused research question and plan." },
-  maths: { icon: "∑", label: "A03 / SOLVE", title: "Mathematics", description: "Work through mathematical problems with structured reasoning, clear steps and checks.", prompt: "Show me how to approach this equation and explain each step." },
-  engineering: { icon: "⌬", label: "A04 / DESIGN", title: "Engineering", description: "Explore engineering principles, calculations, design approaches and practical problem-solving.", prompt: "Help me structure an engineering design problem." },
-  programming: { icon: "⌘", label: "A05 / BUILD", title: "IT & Programming", description: "Develop software, debug code and understand computing, networks, databases and IoT.", prompt: "Help me debug a program and explain why the error occurs." },
-  writing: { icon: "¶", label: "A06 / COMMUNICATE", title: "Academic Writing", description: "Organise academic arguments, interpret briefs and improve clarity, structure and referencing.", prompt: "Help me create a clear structure for my assignment." },
-  design: { icon: "◈", label: "A07 / CREATE", title: "Design Studio", description: "Plan presentations, diagrams, visual explanations and communication materials.", prompt: "Help me plan a presentation that explains a technical idea." },
-  exam: { icon: "◷", label: "A08 / PREPARE", title: "Exam Coach", description: "Build revision plans, practise retrieval and identify topics that need more attention.", prompt: "Create a practical revision strategy for my upcoming exam." },
-  quality: { icon: "✓", label: "A09 / REVIEW", title: "Quality Assurance", description: "Review work against a rubric, check completeness and flag unsupported claims or inconsistencies.", prompt: "Review my assignment against its marking rubric." },
-  career: { icon: "↗", label: "A10 / GROW", title: "Career Mentor", description: "Explore career directions, build industry skills and plan projects that demonstrate your capability.", prompt: "Help me create a skills roadmap for a technology career." }
-};
-
 const $ = (id) => document.getElementById(id);
-let selected = "tutor";
-let conversation = [];
-let sending = false;
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  })[char]);
-}
-
-function renderConversation() {
-  const box = $("demoResponse");
-  if (!box) return;
-  const specialist = agents[selected];
-  box.innerHTML = '<span class="response-label">CONVERSATION · ' + escapeHtml(specialist.title.toUpperCase()) + '</span>' +
-    (conversation.length ? conversation.map((message) =>
-      '<div class="chat-message ' + (message.role === "user" ? "user" : "assistant") + '">' +
-      '<strong>' + (message.role === "user" ? "YOU" : escapeHtml(specialist.title.toUpperCase())) + '</strong>' +
-      '<p>' + escapeHtml(message.content) + '</p></div>'
-    ).join("") : '<p>Your workspace is ready. Ask a question to start working with this specialist.</p>');
-  box.scrollTop = box.scrollHeight;
-}
-
-function selectAgent(key) {
-  if (!agents[key]) return;
-  selected = key;
-  conversation = [];
-  document.querySelectorAll(".agent-card").forEach((card) => {
-    const active = card.dataset.agent === key;
-    card.classList.toggle("active", active);
-    card.setAttribute("aria-pressed", String(active));
+const providerNames = {openai:"ChatGPT / OpenAI",anthropic:"Claude / Anthropic",gemini:"Gemini / Google",perplexity:"Perplexity"};
+let providerStatus = {};
+async function loadProviders(){
+  try{
+    const response=await fetch("/api/providers",{headers:{Accept:"application/json"}});
+    const data=await response.json();
+    providerStatus=data.providers||{};
+  }catch{providerStatus={};}
+  document.querySelectorAll(".provider-chip").forEach(card=>{
+    const key=card.dataset.provider,ready=providerStatus[key]===true;
+    card.classList.toggle("ready",ready);card.classList.toggle("offline",!ready);
+    const state=card.querySelector(".provider-state");if(state)state.textContent=ready?"Connected":"Not configured";
   });
-  const agent = agents[key];
-  $("demoIcon").textContent = agent.icon;
-  $("demoLabel").textContent = agent.label;
-  $("demoTitle").textContent = agent.title;
-  $("demoDescription").textContent = agent.description;
-  $("samplePrompt").textContent = agent.prompt;
-  $("chatInput").placeholder = "Ask " + agent.title + " a question...";
-  renderConversation();
 }
-
-async function sendMessage(event) {
-  if (event) event.preventDefault();
-  const input = $("chatInput");
-  const question = input.value.trim();
-  if (!question || sending) return;
-
-  sending = true;
-  conversation.push({ role: "user", content: question });
-  input.value = "";
-  $("charCount").textContent = "0 / 3000";
-  $("sendButton").disabled = true;
-  $("sendButton").textContent = "Thinking…";
-  renderConversation();
-
-  try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({ agent: selected, messages: conversation.slice(-8) })
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || "The AI service returned an error (" + response.status + ").");
-    if (!data.reply) throw new Error("The AI service returned an empty response.");
-    conversation.push({ role: "assistant", content: data.reply });
-  } catch (error) {
-    conversation.push({
-      role: "assistant",
-      content: "I couldn't complete that request. " + (error.message || "Please try again.")
-    });
-  } finally {
-    sending = false;
-    $("sendButton").disabled = false;
-    $("sendButton").innerHTML = 'Send question <span>→</span>';
-    renderConversation();
-    input.focus();
-  }
+function renderAnswers(items){
+  const area=$("answerArea");
+  area.innerHTML=items.map(item=>'<article class="answer-card"><h3>'+escapeHtml(providerNames[item.provider]||item.provider)+'</h3><p>'+escapeHtml(item.answer||item.error||"No response returned.")+'</p><div class="answer-meta">'+escapeHtml(item.model||"Provider response")+'</div></article>').join("");
 }
-
-document.querySelectorAll(".agent-card").forEach((card) => {
-  card.setAttribute("aria-pressed", String(card.dataset.agent === selected));
-  card.addEventListener("click", () => selectAgent(card.dataset.agent));
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+async function askAI(){
+  const question=$("questionInput").value.trim();if(!question)return;
+  const selected=$("providerSelect").value,compare=$("compareToggle").checked,button=$("askButton");
+  button.disabled=true;button.textContent="Working…";
+  $("answerArea").innerHTML='<div class="answer-empty"><span>✳</span><b>Working on your request…</b><p>Sending your prompt to the configured provider. This may take a moment.</p></div>';
+  try{
+    const response=await fetch("/api/command",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({question,provider:selected,compare})});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error||"The command centre is temporarily unavailable.");
+    renderAnswers(data.results||[]);
+  }catch(error){$("answerArea").innerHTML='<div class="answer-empty"><span>!</span><b>Request not completed</b><p>'+escapeHtml(error.message)+'</p></div>';}
+  finally{button.disabled=false;button.innerHTML='Send to AI <span>→</span>';}
+}
+if($("askButton"))$("askButton").addEventListener("click",askAI);
+if($("questionInput"))$("questionInput").addEventListener("input",()=>{$("questionCount").textContent=$("questionInput").value.length+" / 5000 · Your request is sent only to the selected provider(s).";});
+if($("questionInput"))$("questionInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();askAI();}});
+if($("buildPrompt"))$("buildPrompt").addEventListener("click",()=>{
+ const goal=$("goalInput").value.trim(),context=$("contextInput").value.trim(),format=$("formatSelect").value;
+ if(!goal){$("goalInput").focus();return;}
+ const prompt="Act as a careful, knowledgeable assistant.\n\nOBJECTIVE\n"+goal+"\n\nCONTEXT AND AUDIENCE\n"+(context||"Ask clarifying questions if essential context is missing.")+"\n\nINSTRUCTIONS\n- State assumptions and distinguish facts from interpretation.\n- Do not invent sources, quotations, statistics or references.\n- Flag uncertainty and explain what should be independently verified.\n- Use clear, accurate language appropriate to the audience.\n\nREQUIRED OUTPUT\n"+format+"\n\nBefore finalising, check that the response directly addresses the objective and follows the requested format.";
+ $("generatedPrompt").textContent=prompt;$("promptOutput").hidden=false;
 });
-
-if ($("samplePrompt")) {
-  $("samplePrompt").addEventListener("click", () => {
-    $("chatInput").value = agents[selected].prompt;
-    $("charCount").textContent = $("chatInput").value.length + " / 3000";
-    $("chatInput").focus();
-  });
-  $("samplePrompt").addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      $("samplePrompt").click();
-    }
-  });
-}
-
-if ($("chatForm")) $("chatForm").addEventListener("submit", sendMessage);
-if ($("chatInput")) {
-  $("chatInput").addEventListener("input", () => {
-    $("charCount").textContent = $("chatInput").value.length + " / 3000";
-  });
-  $("chatInput").addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      $("chatForm").requestSubmit();
-    }
-  });
-}
-
-if ($("mobileMenu")) $("mobileMenu").addEventListener("click", () => $("nav").classList.toggle("open"));
-document.querySelectorAll("#nav a").forEach((link) => link.addEventListener("click", () => $("nav").classList.remove("open")));
-if ($("year")) $("year").textContent = new Date().getFullYear();
-renderConversation();
+if($("copyPrompt"))$("copyPrompt").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("generatedPrompt").textContent);$("copyPrompt").textContent="Copied";}catch{$("copyPrompt").textContent="Select and copy";}});
+if($("mobileMenu"))$("mobileMenu").addEventListener("click",()=>$("nav").classList.toggle("open"));
+document.querySelectorAll("#nav a").forEach(link=>link.addEventListener("click",()=>$("nav").classList.remove("open")));
+if($("year"))$("year").textContent=new Date().getFullYear();
+loadProviders();
