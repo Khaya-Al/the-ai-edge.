@@ -11,7 +11,7 @@ export async function onRequestDelete({ request, env, params }) {
   const auth = await requireUser(request, env); if (auth.error) return auth.error;
   const row = await env.DB.prepare("SELECT object_key FROM user_files WHERE id=? AND user_id=?").bind(params.id, auth.user.id).first();
   if (!row) return json({ error: "File not found." }, 404);
-  await env.FILES.delete(row.object_key);
+  if (env.FILES) await env.FILES.delete(row.object_key);
   await env.DB.prepare("DELETE FROM user_files WHERE id=? AND user_id=?").bind(params.id, auth.user.id).run();
   return json({ ok: true });
 }
