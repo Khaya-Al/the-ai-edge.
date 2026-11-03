@@ -1,61 +1,60 @@
 # The AI Edge
 
-The AI Edge is a multi-page learning platform powered by Cloudflare Pages Functions and Workers AI.
+The AI Edge is being redesigned as a public AI command centre: one interface for centrally managed model providers, prompt engineering, evidence-led academic research workflows and AI skills education.
 
-## Current platform features
-- Ten specialist AI agents.
-- Email/password sign-up and sign-in with PBKDF2 password hashing and secure, HTTP-only session cookies.
-- Private conversations saved per account, with conversation history, rename and delete.
-- Private file uploads stored in Cloudflare R2.
-- Browser-side text extraction for PDF, DOCX, TXT and Markdown documents; extracted text can be discussed with the AI.
-- Image files can be stored with a conversation, but the current text-only AI model cannot interpret image pixels yet.
-- Health endpoint reports which Cloudflare services are connected.
+## Current redesign
 
-## Required Cloudflare resources
+- Public landing page and command-centre interface.
+- Provider availability indicators for OpenAI, Anthropic Claude, Google Gemini and Perplexity.
+- Single-provider routing and multi-provider comparison UI.
+- Prompt Engineering Studio that builds reusable, structured prompts in the browser.
+- Academic Research Laboratory overview covering discovery, reference checking, claim assessment and synthesis.
+- Cloudflare Pages Functions keep provider credentials on the server; no API key is sent to browser code.
 
-The site uses the existing Workers AI binding named `AI`, plus two resources that must be created and connected before account and upload features work:
+## Central provider configuration
 
-1. **D1 database** — create a database, then open its Console and execute the SQL in `migrations/0001_initial.sql`.
-2. **R2 bucket** — create a private bucket for user uploads (for example `the-ai-edge-uploads`).
+The command centre supports these Cloudflare Pages environment secrets:
 
-Bind both to the Pages project:
-- Pages project → Settings → Bindings → Add → D1 database. Variable name: `DB`. Select the database.
-- Pages project → Settings → Bindings → Add → R2 bucket. Variable name: `FILES`. Select the bucket.
-- Keep the existing Workers AI binding variable name exactly `AI`.
-- Save and trigger a new deployment after adding bindings.
+| Secret name | Provider |
+| --- | --- |
+| `OPENAI_API_KEY` | OpenAI Responses API |
+| `ANTHROPIC_API_KEY` | Anthropic Messages API |
+| `GEMINI_API_KEY` | Google Gemini API |
+| `PERPLEXITY_API_KEY` | Perplexity API |
 
-Do not make the R2 bucket public. User files are retrieved only through authenticated Pages Functions.
+Add credentials in Cloudflare Pages → Settings → Variables and Secrets. Use encrypted secrets, not public environment variables. The public `/api/providers` endpoint exposes only whether a provider is configured; it never returns secret values.
+
+Provider API usage is billed to The AI Edge's central provider accounts and is separate from consumer subscriptions in cases where the provider treats its API as a separate product. Confirm each provider's current terms, regional availability, model access and billing before enabling it.
+
+Official references:
+- OpenAI API authentication: https://developers.openai.com/api/reference/overview
+- Anthropic API authentication: https://platform.claude.com/docs/en/manage-claude/authentication
+- Gemini API keys: https://ai.google.dev/gemini-api/docs/api-key
+- Perplexity API: https://docs.perplexity.ai/
+
+## Important production gate
+
+**Do not add live provider keys and expose the public command endpoint to general traffic until abuse controls are enabled.** The current API validates request size and provider configuration, but a public production launch still needs edge rate limiting, bot protection, spend caps/alerts at each provider, monitoring, and a clear acceptable-use/privacy policy. Without these controls, anonymous visitors could consume centrally billed API credits.
+
+Recommended next steps before opening live AI access:
+1. Configure Cloudflare rate limiting for `/api/command` and bot protection (for example, Turnstile with server-side validation).
+2. Set strict provider-side monthly budgets and alert thresholds.
+3. Add user-facing usage limits and request logging that avoids storing sensitive prompt content.
+4. Add a privacy notice explaining which provider receives a prompt and how it is processed.
+5. Add scholarly metadata integrations (Crossref, OpenAlex and Semantic Scholar) before claiming reference verification is live.
+
+## Research integrity
+
+The Research Laboratory section is currently a product direction/preview, not a completed scholarly verification engine. It does not yet certify citations, check every claim against primary sources, detect plagiarism, or guarantee academic integrity. Never present AI-generated references as verified. A production implementation should resolve DOI metadata and compare title, author, year and publication details against scholarly indexes, then show evidence and confidence for each check.
 
 ## Deployment
+
 - Repository: `Khaya-Al/the-ai-edge.`
+- Branch: `main`
 - Build command: `npm run build`
 - Build output: `dist`
-- Branch: `main`
+- Cloudflare Pages project: `the-ai-edge`
+- Production URL: https://the-ai-edge.pages.dev/
 - GitHub pushes trigger Cloudflare Pages deployments automatically.
 
-After the D1 migration and bindings are configured, visit `/api/health`. The expected readiness fields are:
-```json
-{
-  "ok": true,
-  "aiConfigured": true,
-  "databaseConfigured": true,
-  "fileStorageConfigured": true,
-  "ready": true
-}
-```
-
-## Account and security notes
-- Passwords are never stored in plain text. Passwords are hashed with PBKDF2-SHA-256 and a unique salt.
-- Sessions use random opaque tokens stored as SHA-256 hashes in D1 and are issued in Secure, HttpOnly, SameSite=Lax cookies.
-- Conversations and files are scoped to the authenticated user.
-- Registration currently does not require email verification. Password-reset emails, email verification, stronger automated abuse controls/rate limiting and account deletion workflows still need to be added before a broad public launch.
-- Keep student data minimal. Do not upload confidential, sensitive or third-party personal information without permission.
-
-## Document handling
-- Supported uploads: PDF, DOCX, TXT, Markdown, PNG, JPG and WebP; maximum 8 MB each.
-- PDF/DOCX/TXT/Markdown text is extracted in the browser and saved with the private file record to support follow-up questions.
-- Image uploads are saved and attached to conversations but are not yet visually analysed by the current model.
-- Scanned PDFs may have no selectable text; OCR is not yet enabled.
-
-## AI
-The current model is `@cf/zai-org/glm-4.7-flash` through Workers AI. Answers are educational assistance, not guaranteed expert advice or verified research. The free Workers AI allocation is limited and can be exhausted.
+The existing Workers AI binding named `AI` may remain configured, but the redesigned command endpoint uses the provider secrets listed above. Existing account, agent and file APIs are not part of the new homepage experience and should not be represented as part of the new product without a separate review.
